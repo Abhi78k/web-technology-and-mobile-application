@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Online College Notice Board</title>
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-title">College Notice Board</div>
+        <div class="brand-subtitle">
+          Online updates for students, faculty, and admin
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="Primary navigation">
+        <button type="button" class="nav-link" id="navLogin">Login</button>
+        <button type="button" class="nav-link" id="navNotices" disabled>
+          Notices
+        </button>
+        <button type="button" class="nav-link" id="navDashboard" disabled>
+          Dashboard
+        </button>
+        <button
+          type="button"
+          class="nav-link nav-logout"
+          id="navLogout"
+          disabled
+        >
+          Logout
+        </button>
+      </nav>
+
+      <div class="user-badge" id="userBadge" aria-live="polite"></div>
+    </header>
+
+    <main class="container">
+      <!-- LOGIN VIEW -->
+      <section id="viewLogin" class="view">
+        <div class="panel hero-panel">
+          <h1 class="panel-title">Sign in</h1>
+          <p class="muted">Login using an existing account.</p>
+
+          <form id="loginForm" class="form">
+            <label class="field">
+              <span>Username</span>
+              <input
+                id="loginUsername"
+                name="username"
+                type="text"
+                autocomplete="username"
+                required
+                placeholder="e.g., admin"
+              />
+            </label>
+
+            <label class="field">
+              <span>Password</span>
+              <input
+                id="loginPassword"
+                name="password"
+                type="password"
+                autocomplete="current-password"
+                required
+                placeholder="e.g., Admin123"
+              />
+            </label>
+
+            <div class="form-actions">
+              <button type="submit" class="btn primary">Login</button>
+              <button type="button" class="btn ghost" id="btnShowDefaults">
+                View demo credentials
+              </button>
+            </div>
+          </form>
+
+          <div
+            id="demoCredentials"
+            class="callout hidden"
+            role="note"
+            aria-live="polite"
+          >
+            <div class="callout-title">Demo users</div>
+            <ul class="callout-list">
+              <li><code>admin</code> / <code>Admin123</code> (Admin)</li>
+              <li><code>faculty</code> / <code>Faculty123</code> (Faculty)</li>
+              <li><code>student</code> / <code>Student123</code> (Student)</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- NOTICES VIEW -->
+      <section id="viewNotices" class="view hidden" aria-live="polite">
+        <div class="view-header">
+          <div>
+            <h2 class="panel-title" style="margin: 0">Notices</h2>
+            <p class="muted" style="margin: 6px 0 0">
+              Search, filter, and open attachments.
+            </p>
+          </div>
+
+          <div class="view-header-actions">
+            <button
+              type="button"
+              class="btn primary"
+              id="btnNewNotice"
+              disabled
+            >
+              + Create Notice
+            </button>
+          </div>
+        </div>
+
+        <div class="filters panel">
+          <div class="filters-row">
+            <label class="field inline">
+              <span class="sr-only">Search</span>
+              <input
+                id="searchInput"
+                type="search"
+                placeholder="Search by title or description..."
+                autocomplete="off"
+              />
+            </label>
+
+            <label class="field inline">
+              <span>Category</span>
+              <select id="categoryFilter">
+                <option value="all">All categories</option>
+              </select>
+            </label>
+
+            <label class="field inline">
+              <span>Date</span>
+              <select id="sortSelect">
+                <option value="newest" selected>Newest</option>
+                <option value="oldest">Oldest</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="filters-meta">
+            <span id="resultsMeta" class="muted">0 results</span>
+          </div>
+        </div>
+
+        <div id="noticeList" class="notice-grid"></div>
+
+        <div id="noticeEmpty" class="empty-state hidden">
+          <div class="empty-title">No notices found</div>
+          <div class="muted">Try changing search or filters.</div>
+        </div>
+      </section>
+
+      <!-- DASHBOARD VIEW -->
+      <section id="viewDashboard" class="view hidden" aria-live="polite">
+        <div class="view-header">
+          <div>
+            <h2 class="panel-title" style="margin: 0">Dashboard</h2>
+            <p class="muted" style="margin: 6px 0 0">
+              Overview and admin tools (Admin only).
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-3">
+          <div class="stat-card">
+            <div class="stat-label">Total notices</div>
+            <div class="stat-value" id="statTotalNotices">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Total users</div>
+            <div class="stat-value" id="statTotalUsers">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Your role</div>
+            <div class="stat-value" id="statRole">—</div>
+          </div>
+        </div>
+
+        <div class="dashboard-grid">
+          <div class="panel">
+            <h3 class="panel-section-title">Recent activity</h3>
+            <ul id="activityList" class="activity-list"></ul>
+            <div id="activityEmpty" class="muted hidden">No activity yet.</div>
+          </div>
+
+          <div class="panel" id="adminUserPanel">
+            <h3 class="panel-section-title">User management</h3>
+            <p class="muted" style="margin: 0 0 12px">
+              Add/remove users and assign roles.
+            </p>
+
+            <form id="userAddForm" class="form compact">
+              <div class="form-row">
+                <label class="field inline">
+                  <span>Username</span>
+                  <input
+                    id="userAddUsername"
+                    type="text"
+                    required
+                    placeholder="e.g., newuser"
+                  />
+                </label>
+                <label class="field inline">
+                  <span>Password</span>
+                  <input
+                    id="userAddPassword"
+                    type="password"
+                    required
+                    placeholder="Set password"
+                  />
+                </label>
+              </div>
+
+              <label class="field inline">
+                <span>Role</span>
+                <select id="userAddRole" required>
+                  <option value="Admin">Admin</option>
+                  <option value="Faculty">Faculty</option>
+                  <option value="Student">Student</option>
+                </select>
+              </label>
+
+              <div class="form-actions">
+                <button type="submit" class="btn primary">Add user</button>
+              </div>
+            </form>
+
+            <div class="divider"></div>
+
+            <div class="table-wrap">
+              <table class="table" aria-label="Users">
+                <thead>
+                  <tr>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th class="right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="usersTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- NOTICE MODAL -->
+    <div
+      id="modalOverlay"
+      class="modal-overlay hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="noticeModalTitle"
+    >
+      <div class="modal">
+        <div class="modal-header">
+          <h3 class="modal-title" id="noticeModalTitle">Create Notice</h3>
+          <button
+            type="button"
+            class="icon-btn"
+            id="btnCloseModal"
+            aria-label="Close"
+          >
+            &times;
+          </button>
+        </div>
+
+        <form id="noticeForm" class="form">
+          <input type="hidden" id="noticeFormMode" value="create" />
+          <input type="hidden" id="noticeFormId" value="" />
+
+          <label class="field">
+            <span>Title</span>
+            <input
+              id="noticeTitle"
+              type="text"
+              required
+              placeholder="e.g., Mid-semester exams schedule"
+            />
+          </label>
+
+          <label class="field">
+            <span>Description</span>
+            <textarea
+              id="noticeDescription"
+              rows="6"
+              required
+              placeholder="Write a plain-text description..."
+            ></textarea>
+          </label>
+
+          <label class="field">
+            <span>Category</span>
+            <input
+              id="noticeCategory"
+              type="text"
+              required
+              list="categoryDatalist"
+              placeholder="e.g., Exams"
+            />
+            <datalist id="categoryDatalist"></datalist>
+          </label>
+
+          <div class="attachments-wrap">
+            <div class="attachments-header">
+              <div>
+                <div class="attachments-title">Attachments</div>
+                <div class="muted" style="margin-top: 2px">
+                  Add files (stored locally) and/or URLs.
+                </div>
+              </div>
+            </div>
+
+            <div class="existing-attachments" id="existingAttachments"></div>
+
+            <div class="attachments-form">
+              <label class="field">
+                <span>Add files</span>
+                <input
+                  id="attachmentFiles"
+                  type="file"
+                  multiple
+                  accept="image/*,application/pdf,video/*"
+                />
+              </label>
+
+              <div class="url-row">
+                <label class="field" style="flex: 1">
+                  <span>Add URL</span>
+                  <input
+                    id="attachmentUrl"
+                    type="url"
+                    placeholder="https://example.com/file.pdf"
+                  />
+                </label>
+                <button type="button" class="btn" id="btnAddAttachmentUrl">
+                  Add
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn ghost" id="btnCancelModal">
+              Cancel
+            </button>
+            <button type="submit" class="btn primary" id="noticeSubmitBtn">
+              Save Notice
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
+    <script src="js/app.js" defer></script>
+  </body>
+</html>
